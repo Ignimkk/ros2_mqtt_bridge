@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/mk/dev_ws/prject/ros_mqtt_bridge/install/mqtt_bridge/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "",
+        "/home/mk/dev_ws/prject/doosan_robotics2/install/common2/lib/common2/imp"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/mk/dev_ws/prject/ros_mqtt_bridge/install/mqtt_bridge/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "",
+        "/home/mk/dev_ws/prject/doosan_robotics2/install/common2/lib/common2/imp"
+    ]
+}

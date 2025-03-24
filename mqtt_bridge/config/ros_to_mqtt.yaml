@@ -1,0 +1,13 @@
+topics:
+  - ros_topic: /tf
+    msg_type: tf2_msgs/msg/TFMessage
+    mqtt_topic: ros/tf
+    qos: 5
+  - ros_topic: /joint_trajectory_controller/joint_trajectory
+    msg_type: trajectory_msgs/msg/JointTrajectory
+    mqtt_topic: ros/joint_trajectory
+    qos: 5
+  - ros_topic: /joint_states
+    msg_type: sensor_msgs/msg/JointState
+    mqtt_topic: ros/joint_states
+    qos: 5
