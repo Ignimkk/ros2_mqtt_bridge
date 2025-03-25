@@ -19,45 +19,51 @@ class MqttToRos2Publisher(Node):
         self.mqtt_client.loop_start()
 
     def on_connect(self, client, userdata, flags, rc):
-        client.subscribe("ros/joint_trajectory")
+        client.subscribe("mqtt/joint_trajectory")
 
     def on_message(self, client, userdata, msg):
         try:
             data = json.loads(msg.payload.decode())
             traj_msg = JointTrajectory()
-
-            # traj_msg.header = Header()
-            # traj_msg.header.stamp = self.get_clock().now().to_msg()
-
-            traj_msg.joint_names = ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"]
+            traj_msg.joint_names = [
+                "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
+                "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"
+            ]
 
             for pt in data.get("points", []):
                 point = JointTrajectoryPoint()
+                
+                # pos_val 추출 후, 리스트가 아니면 리스트로 변환
+                pos_val = pt.get("positions", [])
+                if not isinstance(pos_val, list):
+                    # 만약 pos_val이 int 또는 float라면 리스트로 감싸줌
+                    if isinstance(pos_val, (int, float)):
+                        pos_val = [pos_val]
+                    else:
+                        # 그 외 타입은 JSON 파싱 등으로 재검증
+                        try:
+                            pos_val = json.loads(pos_val)
+                        except Exception as e:
+                            self.get_logger().error(f"Error parsing positions value: {e}")
+                            pos_val = []
 
-                # positions (필수, float 변환)
-                point.positions = [float(x) for x in pt.get("positions", [])]
+                # 이제 pos_val이 리스트임이 보장됨
+                point.positions = [float(x) for x in pos_val]
 
-                # velocities (옵션, 기본값 설정)
-                velocities = pt.get("velocities", [0.5] * len(point.positions))
-                point.velocities = [float(x) for x in velocities]
 
-                # accelerations (옵션, 기본값 설정)
-                accelerations = pt.get("accelerations", [0.1] * len(point.positions))
-                point.accelerations = [float(x) for x in accelerations]
-
-                # time_from_start (옵션)
-                if "time_from_start" in pt:
-                    duration = pt["time_from_start"]
-                    point.time_from_start = Duration(sec=duration.get("sec", 0),
-                                                    nanosec=duration.get("nanosec", 0))
+                # 기본값 처리 (velocities, accelerations, time_from_start)
+                point.velocities = [0.5] * len(point.positions)
+                point.accelerations = [0.1] * len(point.positions)
+                point.time_from_start = Duration(sec=2, nanosec=0)
 
                 traj_msg.points.append(point)
 
-
             self.publisher_.publish(traj_msg)
             self.get_logger().info("Published JointTrajectory to ROS2")
+
         except Exception as e:
             self.get_logger().error(f"Error processing MQTT message: {e}")
+
 
 def main(args=None):
     rclpy.init(args=args)
